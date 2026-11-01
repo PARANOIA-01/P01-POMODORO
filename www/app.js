@@ -7,10 +7,10 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V1.4';
+  var VERSION = 'V1.5';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
-  var WARN_MS = 30000;          // aviso antes de terminar Concentración
+  var WARN_MS = 30000;          // aviso antes de terminar (Android: solo Concentración; web: todas las fases)
   var HORIZON = 16;             // fases que se dejan programadas por adelantado
   var NAMES = { focus: 'Concentración', brk: 'Descanso', long: 'Descanso largo' };
 
@@ -214,11 +214,15 @@
       }
     }
     if (crossed.length && isNative) reschedule();
-    if (t.running && t.phase === 'focus' && !t.warned) {
+    if (t.running && !t.warned && (t.phase === 'focus' || !isNative)) {
       var rem = t.endAt - now;
       if (rem <= WARN_MS && rem > 0) {
         t.warned = true; saveAll();
-        if (!isNative) { vibrate([400, 200, 400, 200, 400]); if (!('vibrate' in navigator)) beep(1, 660); }
+        if (!isNative) {
+          vibrate([400, 200, 400, 200, 400]);
+          if (!('vibrate' in navigator)) beep(1, 660);
+          webNotify('Quedan 30 segundos', 'Ya casi termina ' + NAMES[t.phase] + '.');
+        }
       }
     }
     render();
@@ -228,7 +232,7 @@
   function start() {
     beep(0); // desbloquea el audio con el toque del usuario
     t.running = true; t.endAt = Date.now() + t.remainingMs;
-    t.warned = t.phase === 'focus' && t.remainingMs <= WARN_MS;
+    t.warned = t.remainingMs <= WARN_MS;
     saveAll(); loop(true); keepAwake(true); ensurePermissions(); reschedule(); render();
   }
   function pause() {
@@ -290,6 +294,9 @@
 
   // ---------- Inicio ----------
   $('version').textContent = VERSION;
+  $('note').textContent = isNative
+    ? 'Vibra 30 segundos antes de que termine Concentración y suena una alarma al terminar cada temporizador, aunque el celular esté bloqueado o en vibración.'
+    : 'Te notifica 30 segundos antes de que termine Concentración y Descanso. Suena una alarma al terminar cada temporizador.';
   catchUp(Date.now());
   if (t.running) { loop(true); reschedule(); }
   if (LN) ensurePermissions();

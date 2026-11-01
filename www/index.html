@@ -7,7 +7,7 @@
 <title>P01-POMODORO</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=1.4">
+<link rel="stylesheet" href="styles.css?v=1.5">
 </head>
 <body>
 <div class="app">
@@ -60,11 +60,11 @@
       <label for="in-long">Descanso largo<small id="long-hint">El doble del descanso</small></label>
       <div class="stepper"><button type="button" data-step="long" data-d="-1" aria-label="Menos">−</button><input id="in-long" type="number" min="1" max="120" inputmode="numeric"><button type="button" data-step="long" data-d="1" aria-label="Más">+</button></div>
     </div>
-    <p class="note">Vibra 30 segundos antes de que termine Concentración y suena una alarma al terminar cada temporizador, aunque el celular esté bloqueado o en vibración.</p>
+    <p class="note" id="note">Vibra 30 segundos antes de que termine Concentración y suena una alarma al terminar cada temporizador, aunque el celular esté bloqueado o en vibración.</p>
   </section>
 
   <div class="version">P01-POMODORO · <span id="version"></span></div>
 </div>
-<script src="app.js?v=1.4"></script>
+<script src="app.js?v=1.5"></script>
 </body>
 </html>
