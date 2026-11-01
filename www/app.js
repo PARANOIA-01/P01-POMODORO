@@ -7,11 +7,10 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V1.1';
+  var VERSION = 'V1.2';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar Concentración
-  var ROUNDS = 4;               // rondas antes del descanso largo
   var HORIZON = 16;             // fases que se dejan programadas por adelantado
   var NAMES = { focus: 'Concentración', brk: 'Descanso', long: 'Descanso largo' };
 
@@ -29,7 +28,8 @@
   }
   function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
 
-  var s = load(SETTINGS_KEY, { focus: 25, brk: 5, long: null, todayDate: '', todayCount: 0 });
+  var s = load(SETTINGS_KEY, { focus: 25, brk: 5, long: null, rounds: 4, todayDate: '', todayCount: 0 });
+  if (!s.rounds) s.rounds = 4;
   var t = load(TIMER_KEY, { phase: 'focus', round: 1, running: false, endAt: 0, remainingMs: null, warned: false });
 
   function saveAll() { store(SETTINGS_KEY, s); store(TIMER_KEY, t); }
@@ -41,7 +41,7 @@
 
   // La fase que sigue a (phase, round)
   function nextOf(phase, round) {
-    if (phase === 'focus') return { phase: round === ROUNDS ? 'long' : 'brk', round: round };
+    if (phase === 'focus') return { phase: round >= s.rounds ? 'long' : 'brk', round: round };
     return { phase: 'focus', round: phase === 'long' ? 1 : round + 1 };
   }
 
@@ -102,16 +102,9 @@
   }
 
   // ---------- Alarmas del sistema (Android) ----------
-  var CH_ALARM = 'alarma-v1', CH_WARN = 'aviso-v1';
+  // Los canales los crea MainActivity.java (la alarma usa el volumen de alarma)
+  var CH_ALARM = 'alarma-v2', CH_WARN = 'aviso-v2';
   var nativeReady = Promise.resolve();
-  if (LN) {
-    nativeReady = (async function () {
-      try {
-        await LN.createChannel({ id: CH_ALARM, name: 'Alarma de fin de temporizador', description: 'Suena cuando termina Concentración o Descanso', importance: 5, sound: 'alarma.wav', vibration: true, visibility: 1 });
-        await LN.createChannel({ id: CH_WARN, name: 'Aviso de 30 segundos', description: 'Vibra 30 segundos antes de que termine Concentración', importance: 4, sound: 'silencio.wav', vibration: true, visibility: 1 });
-      } catch (e) {}
-    })();
-  }
 
   async function ensurePermissions() {
     if (LN) {
@@ -154,7 +147,7 @@
               id: id++,
               title: phase === 'focus' ? '¡Tiempo de descanso!' : 'Se acabó el descanso',
               body: phase === 'focus' ? 'Sigue: ' + NAMES[n.phase] + ' (' + Math.round(phaseMs(n.phase) / 60000) + ' min).' : 'Vuelve a Concentración (' + s.focus + ' min).',
-              channelId: CH_ALARM, sound: 'alarma.wav',
+              channelId: CH_ALARM,
               schedule: { at: new Date(end), allowWhileIdle: true }
             });
           }
@@ -196,7 +189,7 @@
     checkDay();
     $('time').textContent = fmt(rem);
     $('phase').innerHTML = '<b>' + NAMES[t.phase] + '</b>';
-    $('round').textContent = 'Ronda ' + t.round + ' de ' + ROUNDS;
+    $('round').textContent = 'Ronda ' + t.round + ' de ' + s.rounds;
     $('start').textContent = t.running ? 'Pausar' : (rem < phaseMs(t.phase) ? 'Seguir' : 'Empezar');
     $('today').textContent = s.todayCount;
     $('dial').style.transform = 'rotate(' + (Math.min(60, Math.max(0, rem) / 60000) * 6) + 'deg)';
@@ -204,6 +197,7 @@
     if (document.activeElement !== $('in-focus')) $('in-focus').value = s.focus;
     if (document.activeElement !== $('in-break')) $('in-break').value = s.brk;
     if (document.activeElement !== $('in-long')) $('in-long').value = longMin();
+    if (document.activeElement !== $('in-rounds')) $('in-rounds').value = s.rounds;
     $('long-hint').textContent = s.long == null ? 'El doble del descanso' : 'Ajustado a mano';
   }
 
@@ -266,8 +260,10 @@
     if (v > 120) v = 120;
     // ¿la fase actual está sin empezar? entonces toma la nueva duración
     var fresh = !t.running && t.remainingMs === phaseMs(t.phase);
+    if (key === 'rounds') v = Math.min(v, 12);
     if (key === 'long') s.long = (v === s.brk * 2) ? null : v;
     else s[key] = v;
+    if (key === 'rounds' && t.round > s.rounds) t.round = s.rounds;
     if (fresh) t.remainingMs = phaseMs(t.phase);
     saveAll(); reschedule(); render();
   }
@@ -280,6 +276,7 @@
   $('in-focus').addEventListener('change', function (e) { setVal('focus', e.target.value); });
   $('in-break').addEventListener('change', function (e) { setVal('brk', e.target.value); });
   $('in-long').addEventListener('change', function (e) { setVal('long', e.target.value); });
+  $('in-rounds').addEventListener('change', function (e) { setVal('rounds', e.target.value); });
 
   // ---------- Volver a la app ----------
   function onResume() {

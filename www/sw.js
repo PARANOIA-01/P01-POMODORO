@@ -1,5 +1,5 @@
 // Guarda la app para que abra sin internet en el portátil
-const CACHE = 'p01-pomodoro-v1.1';
+const CACHE = 'p01-pomodoro-v1.2';
 const FILES = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => {

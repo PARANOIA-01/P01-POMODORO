@@ -1,8 +1,7 @@
 name: App Android (APK)
 
+# Se ejecuta solo cuando se pide (botón "Run workflow" en Actions), para no crear un APK por cada cambio
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

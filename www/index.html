@@ -47,20 +47,24 @@
   <div class="today">Rondas de hoy: <b id="today">0</b></div>
 
   <section class="settings" aria-label="Ajustes">
-    <h2>Ajustes (minutos)</h2>
+    <h2>Ajustes</h2>
     <div class="row">
-      <label for="in-focus">Concentración</label>
+      <label for="in-focus">Concentración<small>minutos</small></label>
       <div class="stepper"><button type="button" data-step="focus" data-d="-1" aria-label="Menos">−</button><input id="in-focus" type="number" min="1" max="120" inputmode="numeric"><button type="button" data-step="focus" data-d="1" aria-label="Más">+</button></div>
     </div>
     <div class="row">
-      <label for="in-break">Descanso</label>
+      <label for="in-break">Descanso<small>minutos</small></label>
       <div class="stepper"><button type="button" data-step="brk" data-d="-1" aria-label="Menos">−</button><input id="in-break" type="number" min="1" max="60" inputmode="numeric"><button type="button" data-step="brk" data-d="1" aria-label="Más">+</button></div>
     </div>
     <div class="row">
       <label for="in-long">Descanso largo<small id="long-hint">El doble del descanso</small></label>
       <div class="stepper"><button type="button" data-step="long" data-d="-1" aria-label="Menos">−</button><input id="in-long" type="number" min="1" max="120" inputmode="numeric"><button type="button" data-step="long" data-d="1" aria-label="Más">+</button></div>
     </div>
-    <p class="note">Vibra 30 segundos antes de que termine Concentración y suena una alarma al terminar cada temporizador, aunque el celular esté bloqueado. Cada 4 rondas toca descanso largo.</p>
+    <div class="row">
+      <label for="in-rounds">Rondas antes del descanso largo</label>
+      <div class="stepper"><button type="button" data-step="rounds" data-d="-1" aria-label="Menos">−</button><input id="in-rounds" type="number" min="1" max="12" inputmode="numeric"><button type="button" data-step="rounds" data-d="1" aria-label="Más">+</button></div>
+    </div>
+    <p class="note">Vibra 30 segundos antes de que termine Concentración y suena una alarma al terminar cada temporizador, aunque el celular esté bloqueado o en vibración.</p>
   </section>
 
   <div class="version">P01-POMODORO · <span id="version"></span></div>
