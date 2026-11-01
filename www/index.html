@@ -7,16 +7,17 @@
 <title>P01-POMODORO</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=1.5">
+<link rel="stylesheet" href="styles.css?v=1.6">
 </head>
 <body>
 <div class="app">
+  <section class="main" aria-label="Temporizador">
   <div class="banner" id="banner" hidden>
     <p id="banner-text"></p>
     <button type="button" id="banner-btn"></button>
   </div>
 
-  <div class="phase" id="phase"><b>Concentración</b></div>
+  <div class="phase" id="phase" data-phase="focus">Concentración</div>
 
   <svg class="tomato" viewBox="0 0 300 300" role="img" aria-label="Reloj de tomate">
     <ellipse cx="150" cy="168" rx="128" ry="118" fill="var(--tomato)"/>
@@ -45,6 +46,7 @@
   </div>
 
   <div class="today">Rondas de hoy: <b id="today">0</b></div>
+  </section>
 
   <section class="settings" aria-label="Ajustes">
     <h2>Ajustes</h2>
@@ -65,6 +67,6 @@
 
   <div class="version">P01-POMODORO · <span id="version"></span></div>
 </div>
-<script src="app.js?v=1.5"></script>
+<script src="app.js?v=1.6"></script>
 </body>
 </html>

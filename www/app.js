@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V1.5';
+  var VERSION = 'V1.6';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (Android: solo Concentración; web: todas las fases)
@@ -188,7 +188,8 @@
     var rem = remaining(Date.now());
     checkDay();
     $('time').textContent = fmt(rem);
-    $('phase').innerHTML = '<b>' + NAMES[t.phase] + '</b>';
+    $('phase').textContent = NAMES[t.phase];
+    $('phase').dataset.phase = t.phase;
     $('round-now').textContent = t.round;
     $('start').textContent = t.running ? 'Pausar' : (rem < phaseMs(t.phase) ? 'Seguir' : 'Empezar');
     $('today').textContent = s.todayCount;
