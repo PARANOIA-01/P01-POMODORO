@@ -13,6 +13,7 @@
   --f: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { min-height: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f); font-size: 16px;
@@ -29,6 +30,15 @@ body {
 #dial { transform-origin: 150px 168px; transition: transform 0.6s linear; }
 .time { font-size: 56px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; line-height: 1; }
 .round, .version { color: var(--muted); font-size: 15px; }
+.round { display: flex; align-items: center; gap: 6px; }
+.rounds-box {
+  width: 2.6em; text-align: center; font: inherit; font-size: 15px; font-weight: 600; color: var(--fg);
+  background: var(--btn); border: 1px solid transparent; border-radius: 8px; padding: 3px 4px;
+  font-variant-numeric: tabular-nums; -moz-appearance: textfield; appearance: textfield; cursor: text;
+}
+.rounds-box:hover { background: var(--btn-hover); }
+.rounds-box:focus { background: var(--bg); border-color: var(--fg); outline: none; }
+.rounds-box::-webkit-inner-spin-button, .rounds-box::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .version { font-size: 13px; }
 .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 button {

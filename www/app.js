@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V1.3';
+  var VERSION = 'V1.4';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar Concentración
@@ -189,7 +189,7 @@
     checkDay();
     $('time').textContent = fmt(rem);
     $('phase').innerHTML = '<b>' + NAMES[t.phase] + '</b>';
-    $('round').textContent = 'Ronda ' + t.round + ' de ' + s.rounds;
+    $('round-now').textContent = t.round;
     $('start').textContent = t.running ? 'Pausar' : (rem < phaseMs(t.phase) ? 'Seguir' : 'Empezar');
     $('today').textContent = s.todayCount;
     $('dial').style.transform = 'rotate(' + (Math.min(60, Math.max(0, rem) / 60000) * 6) + 'deg)';
@@ -277,6 +277,8 @@
   $('in-break').addEventListener('change', function (e) { setVal('brk', e.target.value); });
   $('in-long').addEventListener('change', function (e) { setVal('long', e.target.value); });
   $('in-rounds').addEventListener('change', function (e) { setVal('rounds', e.target.value); });
+  $('in-rounds').addEventListener('focus', function (e) { e.target.select(); });
+  $('in-rounds').addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
 
   // ---------- Volver a la app ----------
   function onResume() {
