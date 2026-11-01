@@ -25,7 +25,7 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   -webkit-tap-highlight-color: transparent;
 }
-.app { max-width: 420px; margin: 0 auto; padding-block: 20px 32px; display: grid; gap: 18px; justify-items: center; text-align: center; }
+.app { max-width: 560px; margin: 0 auto; padding-block: 20px 32px; display: grid; gap: 18px; justify-items: center; text-align: center; }
 .main {
   width: 100%;
   /* Ocupa la primera pantalla completa; Ajustes queda debajo y se ve al bajar */
@@ -34,8 +34,11 @@ body {
   display: grid; align-content: space-evenly; justify-items: center; gap: 16px;
 }
 .phase {
-  font-size: clamp(30px, 9.5vw, 60px); font-weight: 800; letter-spacing: 0.03em; line-height: 1.05;
-  text-transform: uppercase; color: var(--tomato-dark); text-wrap: balance;
+  /* Una sola línea y altura fija: así cambiar de fase no mueve nada más.
+     El tamaño se calcula para que quepa "DESCANSO LARGO", el letrero más largo. */
+  width: 100%; height: 1.2em; line-height: 1.2em; white-space: nowrap; overflow: hidden;
+  font-size: min(52px, calc((100vw - 32px) / 10.6)); font-weight: 800; letter-spacing: 0.03em;
+  text-transform: uppercase; color: var(--tomato-dark);
 }
 .phase[data-phase="brk"] { color: var(--blue); }
 .phase[data-phase="long"] { color: var(--blue-dark); }
@@ -63,7 +66,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--fg); outlin
 button.primary { min-width: 140px; }
 .banner { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px; text-align: left; font-size: 15px; }
 .banner p { margin: 0; }
-.settings { width: 100%; border-top: 1px solid var(--line); padding-top: 18px; display: grid; gap: 12px; text-align: left; }
+.settings { width: 100%; max-width: 420px; border-top: 1px solid var(--line); padding-top: 18px; display: grid; gap: 12px; text-align: left; }
 .settings h2 { font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .row small { display: block; color: var(--muted); font-size: 13px; }

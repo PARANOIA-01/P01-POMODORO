@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V1.6';
+  var VERSION = 'V1.7';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (Android: solo Concentración; web: todas las fases)
