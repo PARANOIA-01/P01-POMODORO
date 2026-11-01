@@ -1,0 +1,27 @@
+{
+  "name": "p01-pomodoro",
+  "version": "1.1.0",
+  "description": "Temporizador Pomodoro sin anuncios para Android y el navegador",
+  "scripts": {
+    "sync": "cap sync android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PARANOIA-01/p01-pomodoro.git"
+  },
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/PARANOIA-01/p01-pomodoro/issues"
+  },
+  "homepage": "https://github.com/PARANOIA-01/p01-pomodoro#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/local-notifications": "^8.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0"
+  },
+  "private": true
+}

@@ -1,0 +1,11 @@
+{
+  "appId": "io.github.paranoia01.pomodoro",
+  "appName": "P01 Pomodoro",
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_tomate",
+      "iconColor": "#E2412F"
+    }
+  }
+}
