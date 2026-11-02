@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V1.7';
+  var VERSION = 'V1.8';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (Android: solo Concentración; web: todas las fases)
@@ -84,7 +84,26 @@
   function webNotify(title, body) {
     try { if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body: body, icon: 'icon-192.png' }); } catch (e) {}
   }
+  // Mensajes variados (www/mensajes.js): se escoge uno al azar sin repetir el anterior
+  var lastPick = {};
+  function pickMessage(key, min) {
+    var list = (window.MENSAJES && window.MENSAJES[key]) || [];
+    if (!list.length) return null;
+    var i = Math.floor(Math.random() * list.length);
+    if (list.length > 1 && i === lastPick[key]) i = (i + 1 + Math.floor(Math.random() * (list.length - 1))) % list.length;
+    lastPick[key] = i;
+    var parts = list[i].replace(/\{min\}/g, String(min)).split(' / ');
+    return { title: parts[0], body: parts.slice(1).join(' / ') };
+  }
+  function minOf(p) { return Math.round(phaseMs(p) / 60000); }
+  function warnMessage() {
+    var key = t.phase === 'focus' ? 'avisoConcentracion' : t.phase === 'brk' ? 'avisoDescanso' : 'avisoDescansoLargo';
+    return pickMessage(key, minOf(nextOf(t.phase, t.round).phase)) || { title: 'Quedan 30 segundos', body: 'Ya casi termina ' + NAMES[t.phase] + '.' };
+  }
   function endMessage(endedPhase) {
+    var key = endedPhase !== 'focus' ? 'finDescanso' : t.phase === 'long' ? 'finConcentracionLargo' : 'finConcentracion';
+    var m = pickMessage(key, minOf(t.phase));
+    if (m) return m;
     if (endedPhase === 'focus') return { title: '¡Tiempo de descanso!', body: 'Terminó Concentración. Sigue: ' + NAMES[t.phase] + '.' };
     return { title: 'Se acabó el descanso', body: 'Vuelve a Concentración.' };
   }
@@ -222,7 +241,7 @@
         if (!isNative) {
           vibrate([400, 200, 400, 200, 400]);
           if (!('vibrate' in navigator)) beep(1, 660);
-          webNotify('Quedan 30 segundos', 'Ya casi termina ' + NAMES[t.phase] + '.');
+          var w = warnMessage(); webNotify(w.title, w.body);
         }
       }
     }
