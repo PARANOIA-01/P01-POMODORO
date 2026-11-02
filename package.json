@@ -1,6 +1,6 @@
 {
   "name": "p01-pomodoro",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "Temporizador Pomodoro sin anuncios para Android y el navegador",
   "scripts": {
     "sync": "cap sync android"

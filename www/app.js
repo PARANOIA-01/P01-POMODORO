@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V1.9';
+  var VERSION = 'V1.10';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (Android: solo Concentración; web: todas las fases)
@@ -28,7 +28,8 @@
   }
   function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
 
-  var s = load(SETTINGS_KEY, { focus: 25, brk: 5, long: null, rounds: 4, todayDate: '', todayCount: 0 });
+  var s = load(SETTINGS_KEY, { focus: 25, brk: 5, long: null, rounds: 4, tone: 'clasico', todayDate: '', todayCount: 0 });
+  if (!s.tone) s.tone = 'clasico';
   if (!s.rounds) s.rounds = 4;
   var t = load(TIMER_KEY, { phase: 'focus', round: 1, running: false, endAt: 0, remainingMs: null, warned: false });
 
@@ -78,6 +79,19 @@
         g.gain.exponentialRampToValueAtTime(0.0001, st + 0.35);
         o.connect(g); g.connect(audioCtx.destination); o.start(st); o.stop(st + 0.4);
       }
+    } catch (e) {}
+  }
+  // Tono de alarma elegido (lista en www/tonos.js)
+  var toneOut = null;
+  function playTone(id) {
+    try {
+      var list = window.TONOS || [], tone = list.filter(function (x) { return x.id === id; })[0] || list[0];
+      if (!tone) { beep(4); return; }
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (toneOut) { try { toneOut.disconnect(); } catch (e) {} } // corta el tono anterior si sigue sonando
+      toneOut = audioCtx.createGain(); toneOut.connect(audioCtx.destination);
+      tone.play(audioCtx, toneOut);
     } catch (e) {}
   }
   function vibrate(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
@@ -229,7 +243,7 @@
     if (crossed.length && !isNative) {
       var last = crossed[crossed.length - 1];
       if (now - last.at < 3000) { // terminó justo ahora, no hace horas
-        beep(4); vibrate([800, 300, 800]);
+        playTone(s.tone); vibrate([800, 300, 800]);
         var msg = endMessage(last.phase); webNotify(msg.title, msg.body);
       }
     }
@@ -303,6 +317,35 @@
   $('in-rounds').addEventListener('change', function (e) { setVal('rounds', e.target.value); });
   $('in-rounds').addEventListener('focus', function (e) { e.target.select(); });
   $('in-rounds').addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
+
+  // ---------- Tonos ----------
+  function buildTones() {
+    var ul = $('tones-list'); ul.innerHTML = '';
+    (window.TONOS || []).forEach(function (tone) {
+      var li = document.createElement('li');
+      li.innerHTML = '<label><input type="radio" name="tone"><span><b></b><small></small></span></label><button type="button" class="play" aria-label="Probar">▶</button>';
+      li.querySelector('b').textContent = tone.nombre;
+      li.querySelector('small').textContent = tone.desc;
+      var radio = li.querySelector('input');
+      radio.value = tone.id; radio.checked = tone.id === s.tone;
+      li.classList.toggle('on', radio.checked);
+      radio.addEventListener('change', function () {
+        s.tone = tone.id; saveAll(); playTone(tone.id);
+        ul.querySelectorAll('li').forEach(function (x) { x.classList.toggle('on', x.querySelector('input').checked); });
+      });
+      li.querySelector('.play').addEventListener('click', function () { playTone(tone.id); });
+      ul.appendChild(li);
+    });
+  }
+  function openTones(on) {
+    $('tones-panel').hidden = !on;
+    $('tones-btn').setAttribute('aria-expanded', on ? 'true' : 'false');
+    if (!on && toneOut) { try { toneOut.disconnect(); } catch (e) {} toneOut = null; }
+  }
+  $('tones-btn').addEventListener('click', function () { openTones($('tones-panel').hidden); });
+  document.addEventListener('click', function (e) { if (!$('tones').contains(e.target)) openTones(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') openTones(false); });
+  buildTones();
 
   // ---------- Volver a la app ----------
   function onResume() {
