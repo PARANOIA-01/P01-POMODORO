@@ -1,8 +1,8 @@
 // Guarda la app para que abra sin internet en el portátil.
 // Siempre pide la versión nueva al servidor (sin usar la copia vieja del navegador)
 // y usa la guardada solo si no hay internet.
-const CACHE = 'p01-pomodoro-v1.8';
-const FILES = ['./', 'index.html', 'styles.css?v=1.8', 'mensajes.js?v=1.8', 'app.js?v=1.8', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'p01-pomodoro-v1.9';
+const FILES = ['./', 'index.html', 'styles.css?v=1.9', 'mensajes.js?v=1.9', 'app.js?v=1.9', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))));
   self.skipWaiting();
