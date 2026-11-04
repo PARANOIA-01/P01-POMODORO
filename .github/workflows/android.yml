@@ -53,13 +53,13 @@ jobs:
         run: echo "name=$(grep -oP 'versionName "\K[^"]+' android/app/build.gradle)" >> "$GITHUB_OUTPUT"
 
       - name: Renombrar el APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk "P01-POMODORO_V${{ steps.v.outputs.name }}.apk"
+        run: cp android/app/build/outputs/apk/release/app-release.apk "P01-TOMATO_V${{ steps.v.outputs.name }}.apk"
 
       - name: Publicar en Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.v.outputs.name }}
-          name: P01-POMODORO_V${{ steps.v.outputs.name }}
+          name: P01-TOMATO_V${{ steps.v.outputs.name }}
           body: Descarga el archivo .apk desde tu celular Android para instalar o actualizar la app.
-          files: P01-POMODORO_V${{ steps.v.outputs.name }}.apk
+          files: P01-TOMATO_V${{ steps.v.outputs.name }}.apk
           make_latest: true

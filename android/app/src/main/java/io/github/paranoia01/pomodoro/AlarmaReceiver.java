@@ -9,6 +9,8 @@ import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import androidx.core.app.NotificationCompat;
 
 /**
@@ -23,6 +25,7 @@ public class AlarmaReceiver extends BroadcastReceiver {
         if (canal == null || canal.isEmpty()) canal = MainActivity.CH_ALARM_PREFIX + "clasico";
         boolean esAlarma = canal.startsWith(MainActivity.CH_ALARM_PREFIX);
         if (esAlarma) tocar(c, i.getStringExtra("tono"));
+        else vibrarAviso(c);
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(c, canal)
             .setSmallIcon(R.drawable.ic_stat_tomate)
@@ -41,6 +44,21 @@ public class AlarmaReceiver extends BroadcastReceiver {
         String sig = i.getStringExtra("sigTexto");
         long sigFin = i.getLongExtra("sigFin", 0L);
         if (TemporizadorService.activo && sig != null && !sig.isEmpty()) TemporizadorService.actualizar(c, sig, sigFin);
+    }
+
+    /** Tres toques de vibración para el aviso de 30 segundos. */
+    private void vibrarAviso(Context c) {
+        try {
+            Vibrator v = (Vibrator) c.getSystemService(Context.VIBRATOR_SERVICE);
+            if (v == null || !v.hasVibrator()) return;
+            long[] patron = { 0, 350, 200, 350, 200, 350 };
+            AudioAttributes aa = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+            if (android.os.Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createWaveform(patron, -1), aa);
+            else v.vibrate(patron, -1, aa);
+        } catch (Exception e) { }
     }
 
     private void tocar(Context c, String tono) {

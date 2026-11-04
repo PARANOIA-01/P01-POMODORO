@@ -14,7 +14,7 @@ public class MainActivity extends BridgeActivity {
     // Deben coincidir con www/app.js. El tono lo toca AlarmaReceiver (res/raw/tono_<id>.wav);
     // el canal de la alarma solo muestra la notificación y vibra.
     static final String CH_ALARM_PREFIX = "alarma-v4";
-    static final String CH_WARN = "aviso-v3";
+    static final String CH_WARN = "aviso-v4";
     static final String[] TONOS_V3 = {
         "clasico", "campanita", "timbre", "pajaritos", "cajita", "recepcion", "ascensor", "juntas",
         "piano", "vibrafono", "recordatorio", "calendario", "madera", "tarea", "cafe"
@@ -35,7 +35,7 @@ public class MainActivity extends BridgeActivity {
         NotificationManager nm = getSystemService(NotificationManager.class);
         if (nm == null) return;
 
-        for (String old : new String[] { "alarma-v1", "aviso-v1", "alarma-v2", "aviso-v2" }) nm.deleteNotificationChannel(old);
+        for (String old : new String[] { "alarma-v1", "aviso-v1", "alarma-v2", "aviso-v2", "aviso-v3" }) nm.deleteNotificationChannel(old);
         for (String t : TONOS_V3) nm.deleteNotificationChannel("alarma-v3-" + t); // V2.2-V2.3: un canal con sonido por tono
 
         NotificationChannel alarm = new NotificationChannel(CH_ALARM_PREFIX, "Alarma de fin de temporizador", NotificationManager.IMPORTANCE_HIGH);
@@ -46,11 +46,12 @@ public class MainActivity extends BridgeActivity {
         alarm.setBypassDnd(true);
         nm.createNotificationChannel(alarm);
 
+        // El aviso de 30 s no vibra por el canal: AlarmaReceiver hace la vibración de 3 toques,
+        // así se distingue de cualquier otra notificación.
         NotificationChannel warn = new NotificationChannel(CH_WARN, "Aviso de 30 segundos", NotificationManager.IMPORTANCE_HIGH);
-        warn.setDescription("Vibra 30 segundos antes de que termine Concentración y Descanso");
+        warn.setDescription("Vibra 3 veces 30 segundos antes de que termine Concentración o Descanso");
         warn.setSound(null, null);
-        warn.enableVibration(true);
-        warn.setVibrationPattern(new long[] { 0, 400, 200, 400, 200, 400 });
+        warn.enableVibration(false);
         nm.createNotificationChannel(warn);
 
         NotificationChannel curso = new NotificationChannel(TemporizadorService.CH, "Temporizador en curso", NotificationManager.IMPORTANCE_LOW);

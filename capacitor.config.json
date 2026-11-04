@@ -1,6 +1,6 @@
 {
   "appId": "io.github.paranoia01.pomodoro",
-  "appName": "P01 Pomodoro",
+  "appName": "P01-TOMATO",
   "webDir": "www",
   "plugins": {
     "LocalNotifications": {

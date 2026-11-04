@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V2.6';
+  var VERSION = 'V2.7';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (todas las fases)
@@ -141,7 +141,7 @@
 
   // ---------- Alarmas del sistema (Android) ----------
   // Los canales los crea MainActivity.java (la alarma usa el volumen de alarma)
-  var CH_ALARM = 'alarma-v4', CH_WARN = 'aviso-v3';
+  var CH_ALARM = 'alarma-v4', CH_WARN = 'aviso-v4';
   function toneId() {
     var ok = (window.TONOS || []).some(function (x) { return x.id === s.tone; });
     return ok ? s.tone : 'clasico';
