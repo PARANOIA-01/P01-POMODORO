@@ -25,6 +25,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(AlarmasPlugin.class);
         super.onCreate(savedInstanceState);
         createChannels();
     }
@@ -60,5 +61,12 @@ public class MainActivity extends BridgeActivity {
         warn.enableVibration(true);
         warn.setVibrationPattern(new long[] { 0, 400, 200, 400, 200, 400 });
         nm.createNotificationChannel(warn);
+
+        NotificationChannel curso = new NotificationChannel(TemporizadorService.CH, "Temporizador en curso", NotificationManager.IMPORTANCE_LOW);
+        curso.setDescription("Muestra la cuenta atrás mientras el temporizador corre");
+        curso.setSound(null, null);
+        curso.enableVibration(false);
+        curso.setShowBadge(false);
+        nm.createNotificationChannel(curso);
     }
 }

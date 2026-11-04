@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V2.2';
+  var VERSION = 'V2.3';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (todas las fases)
@@ -18,6 +18,7 @@
   var isNative = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
   var LN = isNative && Cap.Plugins ? Cap.Plugins.LocalNotifications : null;
   var AppPlugin = isNative && Cap.Plugins ? Cap.Plugins.App : null;
+  var Alarmas = isNative && Cap.Plugins ? Cap.Plugins.Alarmas : null; // plugin propio (AlarmasPlugin.java)
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -145,7 +146,6 @@
     var ok = (window.TONOS || []).some(function (x) { return x.id === s.tone; });
     return CH_ALARM_PREFIX + (ok ? s.tone : 'clasico');
   }
-  var nativeReady = Promise.resolve();
 
   async function ensurePermissions() {
     if (LN) {
@@ -165,34 +165,47 @@
     }
   }
 
+  // Las alarmas las programa AlarmasPlugin.java con setAlarmClock (hora exacta, también bloqueado).
+  // Cada notificación tiene un id único según su hora, así reprogramar nunca borra una alarma que está sonando.
+  function alarmId(at) { return Math.floor(at / 1000) % 2000000000; }
+  function runningText(phase, round) {
+    return NAMES[phase] + (phase === 'long' ? '' : ' · Ronda ' + round + ' de ' + s.rounds);
+  }
   var scheduling = Promise.resolve();
   function reschedule() {
-    if (!LN) return;
+    if (!Alarmas) return;
     scheduling = scheduling.then(async function () {
-      await nativeReady;
       try {
-        var pending = await LN.getPending();
-        if (pending.notifications && pending.notifications.length) {
-          await LN.cancel({ notifications: pending.notifications.map(function (n) { return { id: n.id }; }) });
-        }
-        if (!t.running) return;
-        var list = [], id = 1, now = Date.now();
+        if (!t.running) { await Alarmas.cancelar(); return; }
+        var items = [], now = Date.now();
         var phase = t.phase, round = t.round, end = t.endAt;
         for (var i = 0; i < HORIZON; i++) {
           var n = nextOf(phase, round);
           if (end - WARN_MS > now + 1000 && phaseMs(phase) > WARN_MS) {
             var w = warnMessage(phase, round);
-            list.push({ id: id++, title: w.title, body: w.body, channelId: CH_WARN, schedule: { at: new Date(end - WARN_MS), allowWhileIdle: true } });
+            items.push({ id: alarmId(end - WARN_MS), at: end - WARN_MS, titulo: w.title, cuerpo: w.body, canal: CH_WARN });
           }
+          var nextEnd = end + phaseMs(n.phase);
           if (end > now + 500) {
             var m = endMessage(phase, n.phase);
-            list.push({ id: id++, title: m.title, body: m.body, channelId: alarmChannel(), schedule: { at: new Date(end), allowWhileIdle: true } });
+            items.push({ id: alarmId(end), at: end, titulo: m.title, cuerpo: m.body, canal: alarmChannel(),
+              sigTexto: runningText(n.phase, n.round), sigFin: nextEnd });
           }
-          phase = n.phase; round = n.round; end += phaseMs(phase);
+          phase = n.phase; round = n.round; end = nextEnd;
         }
-        if (list.length) await LN.schedule({ notifications: list });
+        await Alarmas.programar({ items: items, texto: runningText(t.phase, t.round), fin: t.endAt });
       } catch (e) { console.error('No se pudieron programar las alarmas', e); }
     });
+  }
+  // Las versiones anteriores (hasta V2.2) programaban con LocalNotifications: se limpian una vez
+  async function clearOldSchedule() {
+    if (!LN) return;
+    try {
+      var pending = await LN.getPending();
+      if (pending.notifications && pending.notifications.length) {
+        await LN.cancel({ notifications: pending.notifications.map(function (n) { return { id: n.id }; }) });
+      }
+    } catch (e) {}
   }
 
   // ---------- Pantalla ----------
@@ -364,14 +377,37 @@
   $('note').textContent = isNative
     ? 'Vibra 30 segundos antes de que termine Concentración y Descanso. Suena una alarma al terminar cada temporizador.'
     : 'Te notifica 30 segundos antes de que termine Concentración y Descanso. Suena una alarma al terminar cada temporizador.';
-  catchUp(Date.now());
-  if (t.running) { loop(true); reschedule(); }
-  if (LN) ensurePermissions();
+  async function boot() {
+    if (Alarmas) {
+      // ¿Se cerró la app (deslizándola en Recientes) con el temporizador corriendo? Entonces queda en pausa
+      try {
+        var r = await Alarmas.consumirCierre();
+        var closedAt = r && r.cerradaEn;
+        if (closedAt && t.running) {
+          catchUp(closedAt);
+          t.remainingMs = Math.max(0, t.endAt - closedAt); t.running = false;
+          t.warned = t.remainingMs <= WARN_MS;
+          saveAll();
+        }
+      } catch (e) {}
+      await clearOldSchedule();
+    }
+    catchUp(Date.now());
+    if (t.running) loop(true);
+    reschedule();
+    if (LN) ensurePermissions();
+    render();
+  }
   render();
+  boot();
+
+  // En el navegador: cerrar la pestaña o la ventana pausa el temporizador
+  var reloading = false;
+  if (!isNative) window.addEventListener('pagehide', function () { if (t.running && !reloading) pause(); });
 
   if (!isNative && 'serviceWorker' in navigator && location.protocol === 'https:') {
     var hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function () {});
-    navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadController) location.reload(); });
+    navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadController) { reloading = true; location.reload(); } });
   }
 })();
