@@ -79,6 +79,7 @@ public class AlarmasPlugin extends Plugin {
                 extras.putExtra("titulo", it.optString("titulo"));
                 extras.putExtra("cuerpo", it.optString("cuerpo"));
                 extras.putExtra("canal", it.optString("canal"));
+                extras.putExtra("tono", it.optString("tono", "clasico"));
                 extras.putExtra("sigTexto", it.optString("sigTexto", ""));
                 extras.putExtra("sigFin", it.optLong("sigFin", 0));
                 PendingIntent pi = intentoAlarma(c, id, extras, PendingIntent.FLAG_UPDATE_CURRENT);

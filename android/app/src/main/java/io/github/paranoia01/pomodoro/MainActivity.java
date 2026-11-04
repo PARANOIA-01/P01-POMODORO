@@ -11,16 +11,13 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
 
-    // Deben coincidir con www/app.js: la alarma usa el canal "alarma-v3-<tono>" y el aviso CH_WARN.
-    // Los ids y nombres son los de www/tonos.js; cada tono tiene su archivo res/raw/tono_<id>.wav.
-    static final String CH_ALARM_PREFIX = "alarma-v3-";
+    // Deben coincidir con www/app.js. El tono lo toca AlarmaReceiver (res/raw/tono_<id>.wav);
+    // el canal de la alarma solo muestra la notificación y vibra.
+    static final String CH_ALARM_PREFIX = "alarma-v4";
     static final String CH_WARN = "aviso-v3";
-    static final String[][] TONOS = {
-        { "clasico", "Clásico" }, { "campanita", "Campanita" }, { "timbre", "Timbre" },
-        { "pajaritos", "Pajaritos" }, { "cajita", "Cajita musical" }, { "recepcion", "Recepción" },
-        { "ascensor", "Ascensor" }, { "juntas", "Sala de juntas" }, { "piano", "Piano suave" },
-        { "vibrafono", "Vibráfono" }, { "recordatorio", "Recordatorio" }, { "calendario", "Calendario" },
-        { "madera", "Madera" }, { "tarea", "Tarea lista" }, { "cafe", "Café" }
+    static final String[] TONOS_V3 = {
+        "clasico", "campanita", "timbre", "pajaritos", "cajita", "recepcion", "ascensor", "juntas",
+        "piano", "vibrafono", "recordatorio", "calendario", "madera", "tarea", "cafe"
     };
 
     @Override
@@ -39,21 +36,15 @@ public class MainActivity extends BridgeActivity {
         if (nm == null) return;
 
         for (String old : new String[] { "alarma-v1", "aviso-v1", "alarma-v2", "aviso-v2" }) nm.deleteNotificationChannel(old);
+        for (String t : TONOS_V3) nm.deleteNotificationChannel("alarma-v3-" + t); // V2.2-V2.3: un canal con sonido por tono
 
-        AudioAttributes alarmAudio = new AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ALARM)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build();
-        for (String[] tono : TONOS) {
-            Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/raw/tono_" + tono[0]);
-            NotificationChannel alarm = new NotificationChannel(CH_ALARM_PREFIX + tono[0], "Alarma: " + tono[1], NotificationManager.IMPORTANCE_HIGH);
-            alarm.setDescription("Suena cuando termina Concentración o Descanso con el tono " + tono[1]);
-            alarm.setSound(sound, alarmAudio);
-            alarm.enableVibration(true);
-            alarm.setVibrationPattern(new long[] { 0, 800, 300, 800, 300, 800 });
-            alarm.setBypassDnd(true);
-            nm.createNotificationChannel(alarm);
-        }
+        NotificationChannel alarm = new NotificationChannel(CH_ALARM_PREFIX, "Alarma de fin de temporizador", NotificationManager.IMPORTANCE_HIGH);
+        alarm.setDescription("Avisa cuando termina Concentración o Descanso (el tono se elige dentro de la app)");
+        alarm.setSound(null, null);
+        alarm.enableVibration(true);
+        alarm.setVibrationPattern(new long[] { 0, 800, 300, 800 });
+        alarm.setBypassDnd(true);
+        nm.createNotificationChannel(alarm);
 
         NotificationChannel warn = new NotificationChannel(CH_WARN, "Aviso de 30 segundos", NotificationManager.IMPORTANCE_HIGH);
         warn.setDescription("Vibra 30 segundos antes de que termine Concentración y Descanso");

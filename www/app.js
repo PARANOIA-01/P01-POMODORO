@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V2.3';
+  var VERSION = 'V2.4';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (todas las fases)
@@ -141,10 +141,10 @@
 
   // ---------- Alarmas del sistema (Android) ----------
   // Los canales los crea MainActivity.java (la alarma usa el volumen de alarma)
-  var CH_ALARM_PREFIX = 'alarma-v3-', CH_WARN = 'aviso-v3';
-  function alarmChannel() {
+  var CH_ALARM = 'alarma-v4', CH_WARN = 'aviso-v3';
+  function toneId() {
     var ok = (window.TONOS || []).some(function (x) { return x.id === s.tone; });
-    return CH_ALARM_PREFIX + (ok ? s.tone : 'clasico');
+    return ok ? s.tone : 'clasico';
   }
 
   async function ensurePermissions() {
@@ -188,7 +188,7 @@
           var nextEnd = end + phaseMs(n.phase);
           if (end > now + 500) {
             var m = endMessage(phase, n.phase);
-            items.push({ id: alarmId(end), at: end, titulo: m.title, cuerpo: m.body, canal: alarmChannel(),
+            items.push({ id: alarmId(end), at: end, titulo: m.title, cuerpo: m.body, canal: CH_ALARM, tono: toneId(),
               sigTexto: runningText(n.phase, n.round), sigFin: nextEnd });
           }
           phase = n.phase; round = n.round; end = nextEnd;
