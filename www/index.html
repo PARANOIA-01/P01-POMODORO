@@ -7,7 +7,7 @@
 <title>P01-POMODORO</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=2.4">
+<link rel="stylesheet" href="styles.css?v=2.5">
 </head>
 <body>
 <div class="tones" id="tones">
@@ -16,6 +16,16 @@
     <h2>Tono de alarma</h2>
     <p>Elige el que suena al terminar cada temporizador. Toca ▶ para escucharlo.</p>
     <ul id="tones-list"></ul>
+  </div>
+</div>
+<div class="more" id="more">
+  <button type="button" id="more-btn" class="more-btn" aria-expanded="false" aria-controls="more-panel" aria-label="Más información">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+  </button>
+  <div class="more-panel" id="more-panel" hidden>
+    <h2>Gracias</h2>
+    <p>Gracias por descargar <span style="white-space:nowrap">P01-POMODORO</span>. Si quieres probar otras aplicaciones del desarrollador, visita su página de GitHub.</p>
+    <a href="https://github.com/PARANOIA-01" target="_blank" rel="noopener">github.com/PARANOIA-01</a>
   </div>
 </div>
 <div class="app">
@@ -75,8 +85,8 @@
 
   <div class="version">P01-POMODORO · <span id="version"></span></div>
 </div>
-<script src="mensajes.js?v=2.4"></script>
-<script src="tonos.js?v=2.4"></script>
-<script src="app.js?v=2.4"></script>
+<script src="mensajes.js?v=2.5"></script>
+<script src="tonos.js?v=2.5"></script>
+<script src="app.js?v=2.5"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V2.4';
+  var VERSION = 'V2.5';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (todas las fases)
@@ -363,6 +363,15 @@
   document.addEventListener('click', function (e) { if (!$('tones').contains(e.target)) openTones(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') openTones(false); });
   buildTones();
+
+  // ---------- Menú de tres puntos (arriba a la derecha) ----------
+  function openMore(on) {
+    $('more-panel').hidden = !on;
+    $('more-btn').setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+  $('more-btn').addEventListener('click', function () { openMore($('more-panel').hidden); });
+  document.addEventListener('click', function (e) { if (!$('more').contains(e.target)) openMore(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') openMore(false); });
 
   // ---------- Volver a la app ----------
   function onResume() {

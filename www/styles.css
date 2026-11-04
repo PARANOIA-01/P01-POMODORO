@@ -102,3 +102,18 @@ button.primary { min-width: 140px; }
 #tones-list small { display: block; color: var(--muted); font-size: 12.5px; }
 #tones-list .play { min-width: 36px; padding: 6px 0; border-radius: 9px; font-size: 13px; background: var(--bg); border: 1px solid var(--line); }
 #tones-list .play:hover { background: var(--btn-hover); }
+
+/* Menú de tres puntos, arriba a la derecha */
+.more { position: fixed; top: max(16px, env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 10; text-align: left; }
+.more-btn { min-width: 0; width: 42px; height: 42px; padding: 0; display: grid; place-items: center; }
+.more-btn svg { fill: var(--fg); }
+.more-btn[aria-expanded="true"] { background: var(--btn-hover); }
+.more-panel {
+  position: absolute; top: calc(100% + 8px); right: 0; width: min(300px, calc(100vw - 32px));
+  background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+  box-shadow: 0 10px 30px rgba(30, 35, 40, 0.12); display: grid; gap: 10px;
+}
+.more-panel h2 { font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.more-panel p { margin: 0; font-size: 15px; line-height: 1.5; }
+.more-panel a { color: var(--tomato-dark); font-weight: 600; text-decoration: none; }
+.more-panel a:hover { text-decoration: underline; }
