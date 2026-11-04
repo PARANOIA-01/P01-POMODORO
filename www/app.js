@@ -7,10 +7,10 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V2.1';
+  var VERSION = 'V2.2';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
-  var WARN_MS = 30000;          // aviso antes de terminar (Android: solo Concentración; web: todas las fases)
+  var WARN_MS = 30000;          // aviso antes de terminar (todas las fases)
   var HORIZON = 16;             // fases que se dejan programadas por adelantado
   var NAMES = { focus: 'Concentración', brk: 'Descanso', long: 'Descanso largo' };
 
@@ -110,15 +110,19 @@
     return { title: parts[0], body: parts.slice(1).join(' / ') };
   }
   function minOf(p) { return Math.round(phaseMs(p) / 60000); }
-  function warnMessage() {
-    var key = t.phase === 'focus' ? 'avisoConcentracion' : t.phase === 'brk' ? 'avisoDescanso' : 'avisoDescansoLargo';
-    return pickMessage(key, minOf(nextOf(t.phase, t.round).phase)) || { title: 'Quedan 30 segundos', body: 'Ya casi termina ' + NAMES[t.phase] + '.' };
+  // phase/round: la fase que está por terminar (por defecto, la actual)
+  function warnMessage(phase, round) {
+    if (phase == null) { phase = t.phase; round = t.round; }
+    var key = phase === 'focus' ? 'avisoConcentracion' : phase === 'brk' ? 'avisoDescanso' : 'avisoDescansoLargo';
+    return pickMessage(key, minOf(nextOf(phase, round).phase)) || { title: 'Quedan 30 segundos', body: 'Ya casi termina ' + NAMES[phase] + '.' };
   }
-  function endMessage(endedPhase) {
-    var key = endedPhase !== 'focus' ? 'finDescanso' : t.phase === 'long' ? 'finConcentracionLargo' : 'finConcentracion';
-    var m = pickMessage(key, minOf(t.phase));
+  // endedPhase: la que terminó; nextPhase: la que empieza (por defecto, la actual)
+  function endMessage(endedPhase, nextPhase) {
+    if (nextPhase == null) nextPhase = t.phase;
+    var key = endedPhase !== 'focus' ? 'finDescanso' : nextPhase === 'long' ? 'finConcentracionLargo' : 'finConcentracion';
+    var m = pickMessage(key, minOf(nextPhase));
     if (m) return m;
-    if (endedPhase === 'focus') return { title: '¡Tiempo de descanso!', body: 'Terminó Concentración. Sigue: ' + NAMES[t.phase] + '.' };
+    if (endedPhase === 'focus') return { title: '¡Tiempo de descanso!', body: 'Terminó Concentración. Sigue: ' + NAMES[nextPhase] + '.' };
     return { title: 'Se acabó el descanso', body: 'Vuelve a Concentración.' };
   }
 
@@ -136,7 +140,11 @@
 
   // ---------- Alarmas del sistema (Android) ----------
   // Los canales los crea MainActivity.java (la alarma usa el volumen de alarma)
-  var CH_ALARM = 'alarma-v2', CH_WARN = 'aviso-v2';
+  var CH_ALARM_PREFIX = 'alarma-v3-', CH_WARN = 'aviso-v3';
+  function alarmChannel() {
+    var ok = (window.TONOS || []).some(function (x) { return x.id === s.tone; });
+    return CH_ALARM_PREFIX + (ok ? s.tone : 'clasico');
+  }
   var nativeReady = Promise.resolve();
 
   async function ensurePermissions() {
@@ -172,17 +180,13 @@
         var phase = t.phase, round = t.round, end = t.endAt;
         for (var i = 0; i < HORIZON; i++) {
           var n = nextOf(phase, round);
-          if (phase === 'focus' && end - WARN_MS > now + 1000 && phaseMs('focus') > WARN_MS) {
-            list.push({ id: id++, title: 'Quedan 30 segundos', body: 'Prepárate, ya casi termina Concentración.', channelId: CH_WARN, schedule: { at: new Date(end - WARN_MS), allowWhileIdle: true } });
+          if (end - WARN_MS > now + 1000 && phaseMs(phase) > WARN_MS) {
+            var w = warnMessage(phase, round);
+            list.push({ id: id++, title: w.title, body: w.body, channelId: CH_WARN, schedule: { at: new Date(end - WARN_MS), allowWhileIdle: true } });
           }
           if (end > now + 500) {
-            list.push({
-              id: id++,
-              title: phase === 'focus' ? '¡Tiempo de descanso!' : 'Se acabó el descanso',
-              body: phase === 'focus' ? 'Sigue: ' + NAMES[n.phase] + ' (' + Math.round(phaseMs(n.phase) / 60000) + ' min).' : 'Vuelve a Concentración (' + s.focus + ' min).',
-              channelId: CH_ALARM,
-              schedule: { at: new Date(end), allowWhileIdle: true }
-            });
+            var m = endMessage(phase, n.phase);
+            list.push({ id: id++, title: m.title, body: m.body, channelId: alarmChannel(), schedule: { at: new Date(end), allowWhileIdle: true } });
           }
           phase = n.phase; round = n.round; end += phaseMs(phase);
         }
@@ -248,7 +252,7 @@
       }
     }
     if (crossed.length && isNative) reschedule();
-    if (t.running && !t.warned && (t.phase === 'focus' || !isNative)) {
+    if (t.running && !t.warned) {
       var rem = t.endAt - now;
       if (rem <= WARN_MS && rem > 0) {
         t.warned = true; saveAll();
@@ -330,7 +334,7 @@
       radio.value = tone.id; radio.checked = tone.id === s.tone;
       li.classList.toggle('on', radio.checked);
       radio.addEventListener('change', function () {
-        s.tone = tone.id; saveAll(); playTone(tone.id);
+        s.tone = tone.id; saveAll(); playTone(tone.id); reschedule();
         ul.querySelectorAll('li').forEach(function (x) { x.classList.toggle('on', x.querySelector('input').checked); });
       });
       li.querySelector('.play').addEventListener('click', function () { playTone(tone.id); });
@@ -358,7 +362,7 @@
   // ---------- Inicio ----------
   $('version').textContent = VERSION;
   $('note').textContent = isNative
-    ? 'Vibra 30 segundos antes de que termine Concentración y suena una alarma al terminar cada temporizador, aunque el celular esté bloqueado o en vibración.'
+    ? 'Vibra 30 segundos antes de que termine Concentración y Descanso. Suena una alarma al terminar cada temporizador.'
     : 'Te notifica 30 segundos antes de que termine Concentración y Descanso. Suena una alarma al terminar cada temporizador.';
   catchUp(Date.now());
   if (t.running) { loop(true); reschedule(); }
