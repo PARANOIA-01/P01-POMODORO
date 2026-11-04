@@ -97,7 +97,7 @@ button.primary { min-width: 140px; }
 #tones-list li:hover { background: #F6F7F8; }
 #tones-list li.on { background: var(--btn); }
 #tones-list label { flex: 1; display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 0; }
-#tones-list input { accent-color: var(--tomato); width: 16px; height: 16px; margin: 0; }
+#tones-list input { accent-color: var(--tomato); width: 16px; height: 16px; margin: 0; flex-shrink: 0; }
 #tones-list b { display: block; font-size: 15px; }
 #tones-list small { display: block; color: var(--muted); font-size: 12.5px; }
 #tones-list .play { min-width: 36px; padding: 6px 0; border-radius: 9px; font-size: 13px; background: var(--bg); border: 1px solid var(--line); }
