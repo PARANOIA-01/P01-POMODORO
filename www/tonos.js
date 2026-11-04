@@ -1,4 +1,4 @@
-/* P01-POMODORO · Tonos de alarma
+/* P01-TOMATO · Tonos de alarma
  * Cada tono se "dibuja" con notas (frecuencia, inicio, duración, tipo de onda).
  * No usa archivos de audio: el navegador genera el sonido.
  * Para crear un tono nuevo, copia uno de la lista y cambia sus notas.

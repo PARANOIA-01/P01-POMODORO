@@ -1,4 +1,4 @@
-/* P01-POMODORO · Mensajes de las notificaciones
+/* P01-TOMATO · Mensajes de las notificaciones
  * Cada notificación tiene una lista de mensajes: "título / mensaje".
  * La app escoge uno al azar cada vez (sin repetir el anterior).
  * {min} se reemplaza por los minutos de la fase que sigue.

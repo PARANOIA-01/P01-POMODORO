@@ -1,6 +1,6 @@
 {
-  "name": "P01-POMODORO",
-  "short_name": "Pomodoro",
+  "name": "P01-TOMATO",
+  "short_name": "P01-TOMATO",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

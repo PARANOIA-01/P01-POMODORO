@@ -1,4 +1,4 @@
-/* P01-POMODORO
+/* P01-TOMATO
  * Temporizador Pomodoro: Concentración y Descanso encadenados, descanso largo cada 4 rondas.
  * En Android (Capacitor) las alarmas se programan en el sistema con notificaciones locales,
  * así suenan y vibran aunque el celular esté bloqueado. En el navegador (portátil) suenan
@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'V2.5';
+  var VERSION = 'V2.6';
   var SETTINGS_KEY = 'p01-pomodoro-ajustes';
   var TIMER_KEY = 'p01-pomodoro-temporizador';
   var WARN_MS = 30000;          // aviso antes de terminar (todas las fases)
@@ -244,7 +244,7 @@
     $('start').textContent = t.running ? 'Pausar' : (rem < phaseMs(t.phase) ? 'Seguir' : 'Empezar');
     $('today').textContent = s.todayCount;
     $('dial').style.transform = 'rotate(' + (Math.min(60, Math.max(0, rem) / 60000) * 6) + 'deg)';
-    document.title = (t.running ? fmt(rem) + ' · ' : '') + 'P01-POMODORO';
+    document.title = (t.running ? fmt(rem) + ' · ' : '') + 'P01-TOMATO';
     if (document.activeElement !== $('in-focus')) $('in-focus').value = s.focus;
     if (document.activeElement !== $('in-break')) $('in-break').value = s.brk;
     if (document.activeElement !== $('in-long')) $('in-long').value = longMin();
